@@ -110,20 +110,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signInWithGoogle = useCallback(async () => {
+    let redirectTo: string;
+    try {
+      redirectTo = getAuthRedirectUrl('/dashboard');
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : 'Authentication is not configured for the deployed website.' };
+    }
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: getAuthRedirectUrl('/dashboard') },
+      options: { redirectTo },
     });
     return { error: error?.message || null };
   }, []);
 
   const resetPassword = useCallback(async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: getAuthRedirectUrl('/reset-password'),
-    });
+    let redirectTo: string;
+    try {
+      redirectTo = getAuthRedirectUrl('/reset-password');
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : 'Password reset is not configured for the deployed website.' };
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
     if (error) {
-      // Don't leak whether the account exists — return generic success
-      return { error: null };
+      console.error('Password reset request failed:', error);
+      // Keep account existence private while still surfacing operational failures.
+      return { error: 'Unable to send a password reset email. Please try again.' };
     }
     return { error: null };
   }, []);
