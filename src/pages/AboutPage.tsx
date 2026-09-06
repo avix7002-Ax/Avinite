@@ -101,7 +101,7 @@ export function AboutPage() {
           <CardContent className="pt-6 text-center">
             <Users className="h-8 w-8 text-accent mx-auto mb-2" />
             <h3 className="font-semibold text-sm">Accessible</h3>
-            <p className="text-xs text-muted-foreground mt-1">Free tier with essential features. Pro unlock for just ₹30 one-time.</p>
+            <p className="text-xs text-muted-foreground mt-1">Free tier with essential features. Pro at ₹49/mo, Premium at ₹99/mo.</p>
           </CardContent>
         </Card>
         <Card>
