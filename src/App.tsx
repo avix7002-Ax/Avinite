@@ -12,6 +12,7 @@ import { WelcomeIntro } from '@/components/WelcomeIntro';
 const LandingPage = lazy(() => import('@/pages/LandingPage').then(m => ({ default: m.LandingPage })));
 const LoginPage = lazy(() => import('@/pages/LoginPage').then(m => ({ default: m.LoginPage })));
 const SignupPage = lazy(() => import('@/pages/SignupPage').then(m => ({ default: m.SignupPage })));
+const ResetPasswordPage = lazy(() => import('@/pages/ResetPasswordPage').then(m => ({ default: m.ResetPasswordPage })));
 const DashboardPage = lazy(() => import('@/pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const SearchPage = lazy(() => import('@/pages/SearchPage').then(m => ({ default: m.SearchPage })));
 const PracticePage = lazy(() => import('@/pages/PracticePage').then(m => ({ default: m.PracticePage })));
@@ -23,8 +24,9 @@ const BookmarksPage = lazy(() => import('@/pages/BookmarksPage').then(m => ({ de
 const ProfilePage = lazy(() => import('@/pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
 const TrendsPage = lazy(() => import('@/pages/TrendsPage').then(m => ({ default: m.TrendsPage })));
 const PYQSeriesPage = lazy(() => import('@/pages/PYQSeriesPage').then(m => ({ default: m.PYQSeriesPage })));
-const AvixAIPage = lazy(() => import('@/pages/AvixAIPage').then(m => ({ default: m.AvixAIPage })));
+const AviniteAIPage = lazy(() => import('@/pages/AviniteAIPage').then(m => ({ default: m.AviniteAIPage })));
 const AboutPage = lazy(() => import('@/pages/AboutPage').then(m => ({ default: m.AboutPage })));
+const SettingsPage = lazy(() => import('@/pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
 const ReviewsPage = lazy(() => import('@/pages/ReviewsPage').then(m => ({ default: m.ReviewsPage })));
 
 function LandingLayout({ children }: { children: ReactNode }) {
@@ -74,6 +76,7 @@ function AppContent() {
           />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route
             path="/dashboard"
             element={
@@ -166,11 +169,19 @@ function AppContent() {
             path="/avinex-ai"
             element={
               <ProtectedRoute>
-                <AvixAIPage />
+                <AviniteAIPage />
               </ProtectedRoute>
             }
           />
           <Route path="/about" element={<AboutPage />} />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <SettingsPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/reviews"
             element={

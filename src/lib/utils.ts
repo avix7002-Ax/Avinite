@@ -40,6 +40,13 @@ export function getSubjectColor(subject: string): string {
   return colors[subject] || 'text-primary';
 }
 
+export function getAuthRedirectUrl(path: string): string {
+  const productionUrl = import.meta.env.VITE_PRODUCTION_URL;
+  const baseUrl = productionUrl || window.location.origin;
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${baseUrl.replace(/\/$/, '')}${cleanPath}`;
+}
+
 export function getSubjectBg(subject: string): string {
   const colors: Record<string, string> = {
     Physics: 'bg-chart-1/10',

@@ -127,7 +127,7 @@ export function ReviewsPage() {
             {activeType === 'rating' && 'How would you rate your experience with Science PYQs AI?'}
             {activeType === 'bug' && 'Found something broken? Tell us what happened and we\'ll fix it.'}
             {activeType === 'feature_request' && 'Have an idea for a new feature? We\'d love to hear it.'}
-            {activeType === 'ai_mistake' && 'Did Avix AI give a wrong answer? Let us know so we can improve.'}
+            {activeType === 'ai_mistake' && 'Did Avinite AI give a wrong answer? Let us know so we can improve.'}
             {activeType === 'improvement' && 'How can we make the app better for you?'}
           </CardDescription>
         </CardHeader>
@@ -161,7 +161,7 @@ export function ReviewsPage() {
                 activeType === 'rating' ? 'Tell us about your experience...' :
                 activeType === 'bug' ? 'Describe the bug: what happened, what you expected, and steps to reproduce...' :
                 activeType === 'feature_request' ? 'Describe the feature you\'d like to see...' :
-                activeType === 'ai_mistake' ? 'What did Avix AI get wrong? Please include the question and the incorrect response...' :
+                activeType === 'ai_mistake' ? 'What did Avinite AI get wrong? Please include the question and the incorrect response...' :
                 'How can we improve?'
               }
               className="min-h-[120px]"

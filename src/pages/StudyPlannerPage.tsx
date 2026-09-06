@@ -7,11 +7,14 @@ import { Badge } from '@/components/ui/Badge';
 import { chapters } from '@/lib/data';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
+import { useSubscription } from '@/hooks/useSubscription';
+import { FeatureGate } from '@/components/FeatureGate';
 import { daysUntil, cn } from '@/lib/utils';
 import type { StudyPhase, WeeklySchedule } from '@/types';
 
 export function StudyPlannerPage() {
   const { user } = useAuth();
+  const { tier, canAccessStudyPlanner, purchasesEnabled, upgrade } = useSubscription();
   const [examDate, setExamDate] = useState('');
   const [dailyHours, setDailyHours] = useState('2');
   const [targetPercentage, setTargetPercentage] = useState('90');
@@ -107,6 +110,22 @@ export function StudyPlannerPage() {
         });
       }
     }, 500);
+  }
+
+  if (!canAccessStudyPlanner) {
+    return (
+      <FeatureGate
+        canAccess={canAccessStudyPlanner}
+        currentTier={tier}
+        purchasesEnabled={purchasesEnabled}
+        onUpgrade={upgrade}
+        featureName="Study Planner"
+        requiredTier="pro"
+        description="Generate a personalised study schedule with phases, weekly timetables, and chapter tracking based on your exam date."
+      >
+        <div />
+      </FeatureGate>
+    );
   }
 
   return (

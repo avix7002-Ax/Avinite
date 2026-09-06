@@ -25,20 +25,22 @@ import {
   ChevronLeft,
   Sparkles,
   Zap,
+  Settings,
+  Monitor,
   type LucideIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
-import { useTheme, themeColorOptions, type ThemeColor, type AnimationMode } from '@/hooks/useTheme';
+import { useTheme, themeColorOptions, type ThemeColor, type AnimationMode, type ThemeMode } from '@/hooks/useTheme';
 import { cn, getInitials } from '@/lib/utils';
-import { AvixLogo } from '@/components/AvixLogo';
+import { AviniteLogo } from '@/components/AviniteLogo';
 import { FloatingParticles } from '@/components/FloatingParticles';
 
-const COLLAPSE_KEY = 'avix-sidebar-collapsed';
+const COLLAPSE_KEY = 'avinite-sidebar-collapsed';
 
 const navItems: { label: string; href: string; icon: LucideIcon }[] = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { label: 'Avix AI', href: '/avinex-ai', icon: Bot },
+  { label: 'Avinite AI', href: '/avinex-ai', icon: Bot },
   { label: 'Search', href: '/search', icon: Search },
   { label: 'Practice', href: '/practice', icon: PenTool },
   { label: 'Doubt Solver', href: '/doubt-solver', icon: MessageCircleQuestion },
@@ -48,15 +50,13 @@ const navItems: { label: string; href: string; icon: LucideIcon }[] = [
   { label: 'Bookmarks', href: '/bookmarks', icon: Bookmark },
   { label: 'PYQ Trends', href: '/trends', icon: TrendingUp },
   { label: 'PYQ Series', href: '/pyq-series', icon: FileText },
-  { label: 'Reviews', href: '/reviews', icon: Star },
-  { label: 'About', href: '/about', icon: Info },
-  { label: 'Profile', href: '/profile', icon: User },
 ];
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem(COLLAPSE_KEY) === 'true');
   const [themeOpen, setThemeOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { mode, color, animations, setMode, setColor, setAnimations, toggleMode } = useTheme();
   const { user, profile, signOut } = useAuth();
   const location = useLocation();
@@ -68,6 +68,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setMobileOpen(false);
+    setUserMenuOpen(false);
+    setThemeOpen(false);
   }, [location.pathname]);
 
   function handleSetColor(c: ThemeColor) { setColor(c); }
@@ -83,9 +85,16 @@ export function AppLayout({ children }: { children: ReactNode }) {
     return location.pathname.startsWith(href);
   };
 
+  const userMenuItems = [
+    { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+    { label: 'Profile', href: '/profile', icon: User },
+    { label: 'About Avinite AI', href: '/about', icon: Info },
+    { label: 'Reviews', href: '/reviews', icon: Star },
+    { label: 'Avinite AI Settings', href: '/settings', icon: Settings },
+  ];
+
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Ambient floating particles */}
       <FloatingParticles count={15} className="hidden md:block opacity-50" />
       {/* ── Desktop Sidebar ── */}
       <aside
@@ -98,10 +107,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
         {/* Logo / brand */}
         <div className={cn('flex h-16 items-center gap-2.5 border-b border-border/50', collapsed ? 'justify-center px-2' : 'px-5')}>
           <Link to="/dashboard" className="flex items-center gap-2.5 font-bold group">
-            <AvixLogo size={36} className="transition-transform group-hover:scale-105" />
+            <AviniteLogo size={36} className="transition-transform group-hover:scale-105" />
             {!collapsed && (
               <span className="text-base font-display tracking-tight whitespace-nowrap animate-fade-in">
-                Avix <span className="gradient-text-brand">AI</span>
+                Avinite <span className="gradient-text-brand">AI</span>
               </span>
             )}
           </Link>
@@ -140,7 +149,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           })}
         </nav>
 
-        {/* Collapse/expand button — premium animated */}
+        {/* Collapse/expand button */}
         <button
           onClick={() => setCollapsed(!collapsed)}
           className={cn(
@@ -149,9 +158,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           )}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          {/* Glow background on hover */}
           <span className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/0 via-primary/10 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          {/* Shimmer sweep */}
           <span className="absolute inset-0 overflow-hidden rounded-xl">
             <span className="absolute inset-y-0 -left-full w-full bg-gradient-to-r from-transparent via-primary/15 to-transparent group-hover:animate-[card-shimmer_0.8s_ease-out]" />
           </span>
@@ -160,22 +167,72 @@ export function AppLayout({ children }: { children: ReactNode }) {
             'group-hover:scale-110 group-active:scale-95'
           )}>
             <ChevronLeft className={cn('h-4 w-4 transition-transform duration-500', collapsed && 'rotate-180')} />
-            {/* Pulse ring on click */}
             <span className="absolute inset-0 rounded-lg ring-1 ring-primary/0 group-hover:ring-primary/20 transition-all duration-300" />
           </span>
           {!collapsed && <span className="relative">Collapse</span>}
         </button>
 
-        {/* Bottom: user + theme + sign out */}
+        {/* Bottom: user corner + theme + sign out */}
         <div className="border-t border-border/50 p-2.5 space-y-1">
-          <div className={cn('flex items-center gap-2.5 px-2 py-1.5', collapsed && 'justify-center')}>
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-primary-foreground text-xs font-semibold flex-shrink-0">
-              {user ? getInitials(profile?.full_name || user.email || 'U') : 'U'}
-            </div>
-            {!collapsed && (
-              <p className="text-sm font-medium truncate flex-1">
-                {profile?.full_name || user?.email}
-              </p>
+          {/* User Corner dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className={cn(
+                'flex w-full items-center gap-2.5 rounded-xl px-2 py-2 text-sm font-medium hover:bg-muted/60 transition-all',
+                collapsed && 'justify-center'
+              )}
+            >
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-primary-foreground text-xs font-semibold flex-shrink-0">
+                {user ? getInitials(profile?.full_name || user.email || 'U') : 'U'}
+              </div>
+              {!collapsed && (
+                <p className="text-sm font-medium truncate flex-1 text-left">
+                  {profile?.full_name || user?.email}
+                </p>
+              )}
+              {!collapsed && (
+                <ChevronLeft className={cn('h-4 w-4 transition-transform', userMenuOpen && 'rotate-90')} />
+              )}
+            </button>
+            {userMenuOpen && (
+              <div className="absolute bottom-full left-0 right-0 mb-2 p-2 rounded-xl border border-border glass-panel shadow-xl animate-scale-in">
+                {!collapsed && (
+                  <p className="text-xs font-semibold text-muted-foreground px-2 py-1.5">
+                    {user?.email}
+                  </p>
+                )}
+                {userMenuItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.href}
+                      to={item.href}
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/60 hover:text-foreground transition-all"
+                    >
+                      <Icon className="h-4 w-4" />
+                      {!collapsed && <span>{item.label}</span>}
+                    </Link>
+                  );
+                })}
+                {/* Theme quick toggle inside user menu */}
+                <div className={cn('flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium text-muted-foreground', !collapsed && 'justify-between')}>
+                  {!collapsed && <span className="flex items-center gap-3"><Palette className="h-4 w-4" />Theme</span>}
+                  <div className="flex gap-1">
+                    <button onClick={() => setMode('light')} className={cn('flex h-6 w-6 items-center justify-center rounded-md transition-all', mode === 'light' ? 'bg-primary/15 text-primary' : 'hover:bg-muted')}><Sun className="h-3 w-3" /></button>
+                    <button onClick={() => setMode('dark')} className={cn('flex h-6 w-6 items-center justify-center rounded-md transition-all', mode === 'dark' ? 'bg-primary/15 text-primary' : 'hover:bg-muted')}><Moon className="h-3 w-3" /></button>
+                    <button onClick={() => setMode('system')} className={cn('flex h-6 w-6 items-center justify-center rounded-md transition-all', mode === 'system' ? 'bg-primary/15 text-primary' : 'hover:bg-muted')}><Monitor className="h-3 w-3" /></button>
+                  </div>
+                </div>
+                <button
+                  onClick={handleSignOut}
+                  className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all"
+                >
+                  <LogOut className="h-4 w-4" />
+                  {!collapsed && <span>Logout</span>}
+                </button>
+              </div>
             )}
           </div>
 
@@ -213,6 +270,15 @@ export function AppLayout({ children }: { children: ReactNode }) {
                     )}
                   >
                     <Moon className="h-3 w-3" /> Dark
+                  </button>
+                  <button
+                    onClick={() => setMode('system')}
+                    className={cn(
+                      'flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium border-2 transition-all flex-1 justify-center',
+                      mode === 'system' ? 'border-primary bg-primary/5 text-primary' : 'border-border hover:border-primary/30'
+                    )}
+                  >
+                    <Monitor className="h-3 w-3" /> System
                   </button>
                 </div>
 
@@ -270,26 +336,14 @@ export function AppLayout({ children }: { children: ReactNode }) {
             {mode === 'dark' ? <Sun className="h-4 w-4 group-hover:scale-110 transition-transform" /> : <Moon className="h-4 w-4 group-hover:scale-110 transition-transform" />}
             {!collapsed && (mode === 'dark' ? 'Light Mode' : 'Dark Mode')}
           </button>
-
-          <button
-            onClick={handleSignOut}
-            title={collapsed ? 'Sign Out' : undefined}
-            className={cn(
-              'flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all group',
-              collapsed && 'justify-center'
-            )}
-          >
-            <LogOut className="h-4 w-4 group-hover:scale-110 transition-transform" />
-            {!collapsed && 'Sign Out'}
-          </button>
         </div>
       </aside>
 
       {/* ── Mobile Header ── */}
       <header className="sticky top-0 z-50 flex h-16 items-center justify-between glass-nav px-4 md:hidden border-b border-border/50">
         <Link to="/dashboard" className="flex items-center gap-2 font-bold">
-          <AvixLogo size={32} />
-          <span className="text-base font-display">Avix <span className="gradient-text-brand">AI</span></span>
+          <AviniteLogo size={32} />
+          <span className="text-base font-display">Avinite <span className="gradient-text-brand">AI</span></span>
         </Link>
         <button
           onClick={() => setMobileOpen(true)}
@@ -308,7 +362,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
             onClick={() => setMobileOpen(false)}
           />
           <div className="fixed inset-y-0 right-0 w-72 glass-nav flex flex-col animate-slide-in-right border-l border-border/50">
-            {/* Floating close button */}
             <button
               onClick={() => setMobileOpen(false)}
               className="absolute -left-4 top-6 z-50 flex h-10 w-10 items-center justify-center rounded-full glass-panel border border-border shadow-lg transition-all hover:scale-110 active:scale-90"
@@ -346,14 +399,44 @@ export function AppLayout({ children }: { children: ReactNode }) {
               })}
             </nav>
 
+            {/* User Corner in mobile */}
             <div className="border-t border-border/50 p-3 space-y-1">
-              <button
-                onClick={toggleMode}
-                className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/60 transition-all"
-              >
-                {mode === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                {mode === 'dark' ? 'Light Mode' : 'Dark Mode'}
-              </button>
+              <div className="flex items-center gap-2.5 px-2 py-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-primary-foreground text-xs font-semibold flex-shrink-0">
+                  {user ? getInitials(profile?.full_name || user.email || 'U') : 'U'}
+                </div>
+                <p className="text-sm font-medium truncate flex-1">
+                  {profile?.full_name || user?.email}
+                </p>
+              </div>
+              {userMenuItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/60 hover:text-foreground transition-all"
+                  >
+                    <Icon className="h-4 w-4" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+              <div className="px-3 py-2">
+                <p className="text-xs font-semibold text-muted-foreground mb-2">Theme Mode</p>
+                <div className="flex gap-2">
+                  <button onClick={() => setMode('light')} className={cn('flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border-2 transition-all flex-1 justify-center', mode === 'light' ? 'border-primary bg-primary/5 text-primary' : 'border-border')}>
+                    <Sun className="h-3 w-3" /> Light
+                  </button>
+                  <button onClick={() => setMode('dark')} className={cn('flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border-2 transition-all flex-1 justify-center', mode === 'dark' ? 'border-primary bg-primary/5 text-primary' : 'border-border')}>
+                    <Moon className="h-3 w-3" /> Dark
+                  </button>
+                  <button onClick={() => setMode('system')} className={cn('flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border-2 transition-all flex-1 justify-center', mode === 'system' ? 'border-primary bg-primary/5 text-primary' : 'border-border')}>
+                    <Monitor className="h-3 w-3" /> System
+                  </button>
+                </div>
+              </div>
               <div className="px-3 py-2">
                 <p className="text-xs font-semibold text-muted-foreground mb-2">Accent Color</p>
                 <div className="flex gap-2 flex-wrap">
@@ -378,7 +461,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all"
               >
                 <LogOut className="h-4 w-4" />
-                Sign Out
+                Logout
               </button>
             </div>
           </div>
@@ -405,7 +488,7 @@ export function ProtectedRoute({ children }: { children: ReactNode }) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <AvixLogo size={56} animated />
+          <AviniteLogo size={56} animated />
           <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         </div>
       </div>

@@ -8,13 +8,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useAuth } from '@/hooks/useAuth';
-import { useProStatus } from '@/hooks/useProStatus';
+import { useSubscription } from '@/hooks/useSubscription';
 import { useAIMemory } from '@/hooks/useAIMemory';
+import { UpgradeModal } from '@/components/UpgradeModal';
+import { TIERS } from '@/lib/subscription';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import { streamAIResponse, type ChatTurn } from '@/lib/avinex-ai';
 import { findDiagram } from '@/lib/diagram-library';
-import { AvixLogo } from '@/components/AvixLogo';
+import { AviniteLogo } from '@/components/AviniteLogo';
 import { renderInlineWithMath } from '@/lib/math-renderer';
 import { extractFileText, formatBytes } from '@/lib/file-extraction';
 import type { AvinexMode, AvinexStyle, AIConversation } from '@/types';
@@ -292,10 +294,11 @@ function DiagramDisplay({ diagramId }: { diagramId: string }) {
   );
 }
 
-export function AvixAIPage() {
+export function AviniteAIPage() {
   const { user } = useAuth();
-  const { isPro, upgradeToPro } = useProStatus();
+  const { tier, isPro, isPremium, canAccessCompanion, dailyAIMessages, purchasesEnabled, upgrade } = useSubscription();
   const { memory, saveMemory, toggleMemory, deleteMemory } = useAIMemory();
+  const [showUpgrade, setShowUpgrade] = useState(false);
 
   const [mode, setMode] = useState<AvinexMode>('academic');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -332,13 +335,13 @@ export function AvixAIPage() {
 
   useEffect(() => {
     const today = new Date().toDateString();
-    const stored = localStorage.getItem('avix-daily-count');
+    const stored = localStorage.getItem('avinite-daily-count');
     if (stored) {
       const data = JSON.parse(stored);
       if (data.date === today) {
         setDailyMessageCount(data.count);
       } else {
-        localStorage.setItem('avix-daily-count', JSON.stringify({ date: today, count: 0 }));
+        localStorage.setItem('avinite-daily-count', JSON.stringify({ date: today, count: 0 }));
         setDailyMessageCount(0);
       }
     }
@@ -373,18 +376,19 @@ export function AvixAIPage() {
     }
   }, [messages, loading, streamingContent]);
 
-  const dailyLimit = isPro ? 500 : 55;
+  const dailyLimit = dailyAIMessages;
   const canSend = dailyMessageCount < dailyLimit && !loading;
 
   const incrementDailyCount = useCallback(() => {
     const newCount = dailyMessageCount + 1;
     setDailyMessageCount(newCount);
-    localStorage.setItem('avix-daily-count', JSON.stringify({ date: new Date().toDateString(), count: newCount }));
+    localStorage.setItem('avinite-daily-count', JSON.stringify({ date: new Date().toDateString(), count: newCount }));
   }, [dailyMessageCount]);
 
   function handleModeChange(newMode: AvinexMode) {
-    if (newMode === 'companion' && !isPro) {
+    if (newMode === 'companion' && !canAccessCompanion) {
       setShowSettings(false);
+      setShowUpgrade(true);
       return;
     }
     setMode(newMode);
@@ -455,7 +459,7 @@ export function AvixAIPage() {
     const fileName = retryFileName ?? (uploadedFile?.name || null);
 
     if (!userMessage && userImages.length === 0 && !fileText) return;
-    if (mode === 'companion' && !isPro) return;
+    if (mode === 'companion' && !canAccessCompanion) return;
     if (!canSend) return;
 
     setInput('');
@@ -596,7 +600,7 @@ export function AvixAIPage() {
   }
 
   async function handleUpgrade() {
-    await upgradeToPro();
+    setShowUpgrade(true);
   }
 
   function handleSaveStyle(style: AvinexStyle) {
@@ -614,11 +618,11 @@ export function AvixAIPage() {
       {/* Header */}
       <div className="flex items-center justify-between gap-3 pb-3 border-b border-border/60">
         <div className="flex items-center gap-3">
-          <AvixLogo size={40} className="flex-shrink-0" />
+          <AviniteLogo size={40} className="flex-shrink-0" />
           <div>
             <h1 className="text-lg font-bold flex items-center gap-2">
-              Avix AI
-              {isPro && <Crown className="h-4 w-4 text-warning" />}
+              Avinite AI
+              {(isPro || isPremium) && <Crown className="h-4 w-4 text-warning" />}
             </h1>
             <p className="text-xs text-muted-foreground">Your Smart Learning & Student Companion</p>
           </div>
@@ -661,7 +665,7 @@ export function AvixAIPage() {
         >
           <Heart className="h-4 w-4" />
           Companion
-          {!isPro && <Lock className="h-3 w-3" />}
+          {!canAccessCompanion && <Lock className="h-3 w-3" />}
         </button>
         {memory?.memory_enabled && (
           <div className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-accent/10 text-accent text-xs font-medium ml-auto">
@@ -735,7 +739,7 @@ export function AvixAIPage() {
               </div>
               {memory?.memory_enabled ? (
                 <p className="text-xs text-muted-foreground mb-2">
-                  Memory is ON. Avix AI remembers your preferences and past conversations. It will never turn off automatically.
+                  Memory is ON. Avinite AI remembers your preferences and past conversations. It will never turn off automatically.
                 </p>
               ) : (
                 <p className="text-xs text-muted-foreground mb-2">
@@ -871,10 +875,10 @@ export function AvixAIPage() {
         {messages.length === 0 && !loading && (
           <div className="text-center py-8 max-w-2xl mx-auto">
             <div className="inline-flex mb-4 animate-fade-in">
-              <AvixLogo size={56} />
+              <AviniteLogo size={56} />
             </div>
             <h2 className="text-xl font-bold mb-2">
-              Hi{memory?.nickname ? ` ${memory.nickname}` : ''}! I'm Avix AI
+              Hi{memory?.nickname ? ` ${memory.nickname}` : ''}! I'm Avinite AI
             </h2>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto text-sm leading-relaxed">
               {mode === 'academic'
@@ -903,7 +907,7 @@ export function AvixAIPage() {
             >
               {msg.role === 'assistant' && (
                 <div className="flex-shrink-0 mt-1">
-                  <AvixLogo size={32} />
+                  <AviniteLogo size={32} />
                 </div>
               )}
               <div
@@ -944,7 +948,7 @@ export function AvixAIPage() {
           {loading && (
             <div className="flex gap-3 animate-fade-in">
               <div className="flex-shrink-0 mt-1">
-                <AvixLogo size={32} />
+                <AviniteLogo size={32} />
               </div>
               <div className="bg-muted/60 border border-border/30 rounded-2xl rounded-tl-md px-4 py-3.5 max-w-[85%] md:max-w-[75%]">
                 {streamingContent ? (
@@ -955,7 +959,7 @@ export function AvixAIPage() {
                     <span className="h-2.5 w-2.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: '150ms' }} />
                     <span className="h-2.5 w-2.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: '300ms' }} />
                     <span className="text-xs text-muted-foreground ml-2 animate-pulse">
-                      {statusMessage || 'Avix AI is thinking...'}
+                      {statusMessage || 'Avinite AI is thinking...'}
                     </span>
                   </div>
                 )}
@@ -986,24 +990,24 @@ export function AvixAIPage() {
       {/* Daily limit warning */}
       {dailyMessageCount >= dailyLimit * 0.8 && dailyMessageCount < dailyLimit && (
         <div className="text-xs text-warning text-center pb-2 max-w-3xl mx-auto">
-          You've used {dailyMessageCount}/{dailyLimit} messages today. {isPro ? '' : 'Upgrade to Pro for 500+ messages/day.'}
+          You've used {dailyMessageCount}/{dailyLimit} messages today. {isPro ? '' : 'Upgrade for more daily messages.'}
         </div>
       )}
       {dailyMessageCount >= dailyLimit && (
         <div className="text-xs text-destructive text-center pb-2 max-w-3xl mx-auto">
-          Daily limit reached ({dailyMessageCount}/{dailyLimit}). Come back tomorrow or {isPro ? '' : 'upgrade to Pro.'}
+          Daily limit reached ({dailyMessageCount}/{dailyLimit}). Come back tomorrow or {isPro ? '' : 'upgrade your plan.'}
         </div>
       )}
 
-      {/* Pro upgrade banner for companion mode */}
-      {mode === 'companion' && !isPro && (
+      {/* Premium upgrade banner for companion mode */}
+      {mode === 'companion' && !canAccessCompanion && (
         <Card className="mb-3 border-warning/30 bg-gradient-to-br from-warning/5 to-primary/5 max-w-3xl mx-auto w-full">
           <CardContent className="pt-4 pb-4">
             <div className="flex items-center gap-3">
               <Crown className="h-8 w-8 text-warning flex-shrink-0" />
               <div className="flex-1">
-                <p className="font-semibold text-sm">Companion Mode is a Pro Feature</p>
-                <p className="text-xs text-muted-foreground">Unlock for one-time payment</p>
+                <p className="font-semibold text-sm">Companion Mode is a Premium Feature</p>
+                <p className="text-xs text-muted-foreground">Upgrade to Premium to unlock the AI companion</p>
               </div>
               <Button size="sm" onClick={handleUpgrade}>Upgrade</Button>
             </div>
@@ -1135,11 +1139,19 @@ export function AvixAIPage() {
           )}
         </div>
         <p className="text-xs text-muted-foreground mt-2 text-center">
-          {dailyMessageCount}/{dailyLimit} messages used today {isPro ? '· Pro' : '· Free'} · Powered by Avix AI
+          {dailyMessageCount}/{dailyLimit} messages used today · {TIERS[tier].name} plan · Powered by Avinite AI
         </p>
       </div>
+
+      <UpgradeModal
+        open={showUpgrade}
+        onClose={() => setShowUpgrade(false)}
+        currentTier={tier}
+        purchasesEnabled={purchasesEnabled}
+        onUpgrade={upgrade}
+      />
     </div>
   );
 }
 
-export default AvixAIPage;
+export default AviniteAIPage;

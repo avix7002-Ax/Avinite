@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
 import { cn } from '@/lib/utils';
-import { AvixLogo } from '@/components/AvixLogo';
+import { AviniteLogo } from '@/components/AviniteLogo';
 
 export function LandingNav() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -26,9 +26,9 @@ export function LandingNav() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 glass-nav">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2.5 font-bold text-lg group">
-          <AvixLogo size={36} className="transition-transform group-hover:scale-105" />
+          <AviniteLogo size={36} className="transition-transform group-hover:scale-105" />
           <span className="hidden sm:inline font-display tracking-tight">
-            Avix <span className="gradient-text-brand">AI</span>
+            Avinite <span className="gradient-text-brand">AI</span>
           </span>
         </Link>
 
@@ -142,8 +142,8 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
             <div className="flex items-center gap-2.5 font-bold text-lg mb-3">
-              <AvixLogo size={36} />
-              <span className="font-display">Avix <span className="gradient-text-brand">AI</span></span>
+              <AviniteLogo size={36} />
+              <span className="font-display">Avinite <span className="gradient-text-brand">AI</span></span>
             </div>
             <p className="text-sm text-muted-foreground max-w-md">
               AI-powered learning platform for CBSE Class 10 Science students. Score higher with
@@ -186,7 +186,7 @@ export function Footer() {
 
         <div className="mt-8 pt-8 border-t border-border/60 space-y-2">
           <p className="text-xs text-muted-foreground text-center">
-            © 2026 Avix AI. Built for CBSE Class 10 students.
+            © 2026 Avinite AI. Built for CBSE Class 10 students.
           </p>
           <p className="text-xs text-muted-foreground/70 text-center">
             Original AI-generated content. No copyrighted CBSE material reproduced.

@@ -1,24 +1,38 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Atom, Mail, Lock, ArrowRight } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
+import { AviniteLogo } from '@/components/AviniteLogo';
 import { useAuth } from '@/hooks/useAuth';
 
 export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const { signIn, signInWithGoogle } = useAuth();
+  const [resetSent, setResetSent] = useState(false);
+  const { signIn, signInWithGoogle, resetPassword } = useAuth();
   const navigate = useNavigate();
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    setLoading(true);
 
+    if (!email.trim() || !password) {
+      setError('Please enter both email and password');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    setLoading(true);
     const { error } = await signIn(email, password);
     setLoading(false);
 
@@ -31,7 +45,29 @@ export function LoginPage() {
 
   async function handleGoogle() {
     setError(null);
-    await signInWithGoogle();
+    const { error } = await signInWithGoogle();
+    if (error) setError(error);
+  }
+
+  async function handleForgotPassword() {
+    if (!email.trim()) {
+      setError('Enter your email above first, then click "Forgot password?"');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+    setError(null);
+    setLoading(true);
+    const { error } = await resetPassword(email);
+    setLoading(false);
+    if (error) {
+      setError(error);
+    } else {
+      setResetSent(true);
+    }
   }
 
   return (
@@ -39,10 +75,8 @@ export function LoginPage() {
       <div className="w-full max-w-md">
         <div className="flex flex-col items-center mb-8">
           <Link to="/" className="flex items-center gap-2 font-bold text-xl mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent text-primary-foreground">
-              <Atom className="h-6 w-6" />
-            </div>
-            <span>Science PYQ AI</span>
+            <AviniteLogo size={40} />
+            <span className="font-display">Avinite <span className="gradient-text-brand">AI</span></span>
           </Link>
           <h1 className="text-2xl font-bold">Welcome back</h1>
           <p className="text-sm text-muted-foreground">Login to continue your Science prep</p>
@@ -54,7 +88,7 @@ export function LoginPage() {
             <CardDescription>Enter your credentials to access your account</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button variant="outline" className="w-full" onClick={handleGoogle}>
+            <Button variant="outline" className="w-full" onClick={handleGoogle} disabled={loading}>
               <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -90,22 +124,47 @@ export function LoginPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Password</label>
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium">Password</label>
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    className="text-xs text-primary hover:underline font-medium"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 pr-10"
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
                 </div>
               </div>
 
               {error && (
                 <p className="text-sm text-destructive bg-destructive/10 rounded-md px-3 py-2">{error}</p>
+              )}
+
+              {resetSent && (
+                <div className="text-sm text-green-600 bg-green-600/10 rounded-md px-3 py-2 space-y-1">
+                  <p className="font-medium">Reset link sent! Check your email inbox.</p>
+                  <p className="text-xs text-green-600/80">
+                    If you don't see it within a minute, check your spam folder. The link expires in 1 hour.
+                  </p>
+                </div>
               )}
 
               <Button type="submit" className="w-full" disabled={loading}>

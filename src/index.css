@@ -262,19 +262,19 @@
 }
 
 /* ── 3D Logo with continuous rotation ── */
-.avix-logo-3d {
+.avinite-logo-3d {
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
-.avix-logo-inner {
+.avinite-logo-inner {
   transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   transform-style: preserve-3d;
   will-change: transform;
 }
 
-.avix-logo-3d:hover .avix-logo-inner {
+.avinite-logo-3d:hover .avinite-logo-inner {
   animation: logo-3d-spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
@@ -285,7 +285,7 @@
 }
 
 /* ── Logo entrance animation ── */
-.avix-logo-entrance {
+.avinite-logo-entrance {
   animation: logo-in 1s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 

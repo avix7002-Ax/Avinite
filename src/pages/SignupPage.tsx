@@ -1,17 +1,20 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Atom, Mail, Lock, User, ArrowRight } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
+import { AviniteLogo } from '@/components/AviniteLogo';
 import { useAuth } from '@/hooks/useAuth';
 
 export function SignupPage() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const { signUp, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
 
@@ -19,26 +22,42 @@ export function SignupPage() {
     e.preventDefault();
     setError(null);
 
+    if (!fullName.trim()) {
+      setError('Please enter your full name');
+      return;
+    }
+    if (fullName.trim().length < 2) {
+      setError('Name must be at least 2 characters');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
     if (password.length < 6) {
       setError('Password must be at least 6 characters');
       return;
     }
 
     setLoading(true);
-
-    const { error } = await signUp(email, password, fullName);
+    const { error } = await signUp(email, password, fullName.trim());
     setLoading(false);
 
     if (error) {
       setError(error);
     } else {
-      navigate('/dashboard');
+      setSuccess(true);
+      setTimeout(() => navigate('/dashboard'), 2000);
     }
   }
 
   async function handleGoogle() {
     setError(null);
-    await signInWithGoogle();
+    const { error } = await signInWithGoogle();
+    if (error) setError(error);
   }
 
   return (
@@ -46,10 +65,8 @@ export function SignupPage() {
       <div className="w-full max-w-md">
         <div className="flex flex-col items-center mb-8">
           <Link to="/" className="flex items-center gap-2 font-bold text-xl mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent text-primary-foreground">
-              <Atom className="h-6 w-6" />
-            </div>
-            <span>Science PYQ AI</span>
+            <AviniteLogo size={40} />
+            <span className="font-display">Avinite <span className="gradient-text-brand">AI</span></span>
           </Link>
           <h1 className="text-2xl font-bold">Start learning free</h1>
           <p className="text-sm text-muted-foreground">Create your account in seconds</p>
@@ -61,7 +78,7 @@ export function SignupPage() {
             <CardDescription>Get free access to all 16 chapters and AI practice</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button variant="outline" className="w-full" onClick={handleGoogle}>
+            <Button variant="outline" className="w-full" onClick={handleGoogle} disabled={loading}>
               <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -116,18 +133,31 @@ export function SignupPage() {
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     placeholder="At least 6 characters"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 pr-10"
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
                 </div>
               </div>
 
               {error && (
                 <p className="text-sm text-destructive bg-destructive/10 rounded-md px-3 py-2">{error}</p>
+              )}
+
+              {success && (
+                <p className="text-sm text-green-600 bg-green-600/10 rounded-md px-3 py-2">
+                  Account created! Redirecting to your dashboard...
+                </p>
               )}
 
               <Button type="submit" className="w-full" disabled={loading}>

@@ -8,11 +8,14 @@ import { Select } from '@/components/ui/Input';
 import { chapters, subjects } from '@/lib/data';
 import { getPYQData, type PYQQuestion } from '@/lib/pyq-series';
 import { useBookmarks } from '@/hooks/useBookmarks';
+import { useSubscription } from '@/hooks/useSubscription';
+import { FeatureGate } from '@/components/FeatureGate';
 import { cn, getSubjectColor, getSubjectBg } from '@/lib/utils';
 import type { Subject } from '@/types';
 
 export function PYQSeriesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { tier, canAccessPYQ, purchasesEnabled, upgrade } = useSubscription();
   const chapterSlug = searchParams.get('chapter') || chapters[0].slug;
   const [filter, setFilter] = useState<'all' | 'topic' | 'year' | 'frequent'>('all');
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
@@ -79,6 +82,15 @@ export function PYQSeriesPage() {
   }
 
   return (
+    <FeatureGate
+      canAccess={canAccessPYQ}
+      currentTier={tier}
+      purchasesEnabled={purchasesEnabled}
+      onUpgrade={upgrade}
+      featureName="PYQ Series"
+      requiredTier="pro"
+      description="Access original board-pattern questions with model answers, writing tips, and NCERT references for every chapter."
+    >
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div>
@@ -298,5 +310,6 @@ export function PYQSeriesPage() {
         </div>
       )}
     </div>
+    </FeatureGate>
   );
 }

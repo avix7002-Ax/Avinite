@@ -124,6 +124,8 @@ export interface Profile {
   target_percentage: number | null;
   exam_date: string | null;
   daily_study_hours: number | null;
+  subscription_tier: 'free' | 'pro' | 'premium';
+  is_owner: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -165,6 +167,7 @@ export interface ProUpgrade {
   is_pro: boolean;
   payment_id: string | null;
   amount: number;
+  tier: 'pro' | 'premium' | null;
   upgraded_at: string | null;
   created_at: string;
 }

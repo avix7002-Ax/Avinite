@@ -10,17 +10,23 @@ import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { LoadingPage } from '@/components/ui/Spinner';
 import { useAuth } from '@/hooks/useAuth';
+import { useSubscription } from '@/hooks/useSubscription';
 import { useUserStats } from '@/hooks/useUserStats';
 import { useRevisionProgress } from '@/hooks/useRevisionProgress';
 import { useTheme, themeColorOptions, type ThemeColor, type AnimationMode } from '@/hooks/useTheme';
 import { useIntro } from '@/hooks/useIntro';
+import { UpgradeModal } from '@/components/UpgradeModal';
+import { TIERS } from '@/lib/subscription';
 import { supabase } from '@/lib/supabase';
 import { getInitials, formatDate, cn } from '@/lib/utils';
+import { Crown, Lock } from 'lucide-react';
 
 export function ProfilePage() {
   const { user, profile, refreshProfile } = useAuth();
   const { stats } = useUserStats();
   const { completedCount, completionPercent } = useRevisionProgress();
+  const { tier, isPro, isPremium, purchasesEnabled, upgrade } = useSubscription();
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const chaptersCount = 16;
   const { mode, color, animations, setMode, setColor, setAnimations } = useTheme();
   const { resetIntro } = useIntro();
@@ -85,7 +91,7 @@ export function ProfilePage() {
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-white text-xl font-semibold">
               {getInitials(profile?.full_name || user.email || 'U')}
             </div>
-            <div>
+            <div className="flex-1">
               <h2 className="text-xl font-semibold">{profile?.full_name || 'Student'}</h2>
               <p className="text-sm text-muted-foreground flex items-center gap-1">
                 <Mail className="h-3 w-3" /> {user.email}
@@ -94,9 +100,33 @@ export function ProfilePage() {
                 Joined {formatDate(profile?.created_at || user.created_at)}
               </p>
             </div>
+            <div className="flex flex-col items-end gap-2">
+              <div className={cn(
+                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold',
+                tier === 'premium' ? 'bg-gradient-to-r from-primary to-accent text-white' :
+                tier === 'pro' ? 'bg-primary/10 text-primary' :
+                'bg-muted text-muted-foreground'
+              )}>
+                {(isPro || isPremium) && <Crown className="h-3 w-3" />}
+                {TIERS[tier].name} Plan
+              </div>
+              {tier !== 'premium' && (
+                <Button size="sm" variant="outline" onClick={() => setShowUpgrade(true)}>
+                  {purchasesEnabled ? <>Upgrade</> : <><Lock className="h-3 w-3 mr-1" /> View Plans</>}
+                </Button>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
+
+      <UpgradeModal
+        open={showUpgrade}
+        onClose={() => setShowUpgrade(false)}
+        currentTier={tier}
+        purchasesEnabled={purchasesEnabled}
+        onUpgrade={upgrade}
+      />
 
       {/* Stats summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -133,7 +163,7 @@ export function ProfilePage() {
             <Palette className="h-5 w-5 text-primary" />
             Appearance & Settings
           </CardTitle>
-          <CardDescription>Customise how Avix AI looks and feels.</CardDescription>
+          <CardDescription>Customise how Avinite AI looks and feels.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Theme selector */}

@@ -8,6 +8,8 @@ import { chapters } from '@/lib/data';
 import { generateMockQuestions, predictBoardScore, type MockQuestion } from '@/lib/ai';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
+import { useSubscription } from '@/hooks/useSubscription';
+import { FeatureGate } from '@/components/FeatureGate';
 import { useNavigate } from 'react-router-dom';
 import { cn, formatTime } from '@/lib/utils';
 
@@ -16,6 +18,7 @@ type TestType = 'chapter' | 'full' | 'custom';
 export function MockTestPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { tier, canAccessMockTest, purchasesEnabled, upgrade } = useSubscription();
 
   const [testType, setTestType] = useState<TestType>('chapter');
   const [selectedChapter, setSelectedChapter] = useState(chapters[0].slug);
@@ -306,7 +309,23 @@ export function MockTestPage() {
     );
   }
 
-  // Setup phase
+  // Setup phase — gate access for non-Pro users
+  if (!canAccessMockTest) {
+    return (
+      <FeatureGate
+        canAccess={canAccessMockTest}
+        currentTier={tier}
+        purchasesEnabled={purchasesEnabled}
+        onUpgrade={upgrade}
+        featureName="Mock Tests"
+        requiredTier="pro"
+        description="Take timed chapter, full-syllabus, or custom mock tests with instant results and predicted board scores."
+      >
+        <div />
+      </FeatureGate>
+    );
+  }
+
   return (
     <div className="space-y-6 animate-fade-in max-w-2xl mx-auto">
       <div>

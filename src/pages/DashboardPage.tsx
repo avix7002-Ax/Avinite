@@ -25,26 +25,29 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { LoadingPage } from '@/components/ui/Spinner';
 import { useAuth } from '@/hooks/useAuth';
+import { useSubscription } from '@/hooks/useSubscription';
 import { useUserStats } from '@/hooks/useUserStats';
 import { useRevisionProgress } from '@/hooks/useRevisionProgress';
 import { chapters, subjects } from '@/lib/data';
 import { formatDate, getInitials, cn } from '@/lib/utils';
-import { AvixLogo } from '@/components/AvixLogo';
+import { AviniteLogo } from '@/components/AviniteLogo';
+import { Lock } from 'lucide-react';
 
 export function DashboardPage() {
   const { user, profile } = useAuth();
   const { stats, loading } = useUserStats();
   const { completedCount, completionPercent } = useRevisionProgress();
+  const { canAccessMockTest, canAccessStudyPlanner, canAccessPYQ, canAccessCompanion } = useSubscription();
 
   if (loading) return <LoadingPage />;
 
-  const quickActions: { label: string; href: string; icon: LucideIcon; color: string; desc: string }[] = [
-    { label: 'Avix AI', href: '/avinex-ai', icon: Bot, color: 'from-blue-500 to-indigo-500', desc: 'Ask any question' },
+  const quickActions: { label: string; href: string; icon: LucideIcon; color: string; desc: string; locked?: boolean }[] = [
+    { label: 'Avinite AI', href: '/avinex-ai', icon: Bot, color: 'from-blue-500 to-indigo-500', desc: 'Ask any question' },
     { label: 'Practice', href: '/practice', icon: PenTool, color: 'from-green-500 to-teal-500', desc: 'AI questions' },
     { label: 'Doubt Solver', href: '/doubt-solver', icon: MessageCircleQuestion, color: 'from-orange-500 to-amber-500', desc: 'Get explanations' },
     { label: 'Revision', href: '/revision', icon: RefreshCw, color: 'from-purple-500 to-pink-500', desc: 'Notes & flashcards' },
-    { label: 'Mock Test', href: '/mock-test', icon: FileClock, color: 'from-rose-500 to-red-500', desc: 'Timed tests' },
-    { label: 'Study Planner', href: '/study-planner', icon: CalendarDays, color: 'from-cyan-500 to-blue-500', desc: 'Custom timetable' },
+    { label: 'Mock Test', href: '/mock-test', icon: FileClock, color: 'from-rose-500 to-red-500', desc: 'Timed tests', locked: !canAccessMockTest },
+    { label: 'Study Planner', href: '/study-planner', icon: CalendarDays, color: 'from-cyan-500 to-blue-500', desc: 'Custom timetable', locked: !canAccessStudyPlanner },
     { label: 'PYQ Trends', href: '/trends', icon: TrendingUp, color: 'from-violet-500 to-purple-500', desc: 'Chapter weightage' },
     { label: 'Bookmarks', href: '/bookmarks', icon: Bookmark, color: 'from-emerald-500 to-green-500', desc: 'Saved items' },
   ];
@@ -220,8 +223,15 @@ export function DashboardPage() {
               >
                 <Card className="glass-card hover:shadow-lg hover:border-primary/30 transition-all duration-300 group h-full">
                   <CardContent className="flex flex-col items-center justify-center py-6 gap-2.5">
-                    <div className={cn('flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br text-white group-hover:scale-110 group-hover:rotate-3 transition-transform', action.color)}>
-                      <Icon className="h-6 w-6" />
+                    <div className="relative">
+                      <div className={cn('flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br text-white group-hover:scale-110 group-hover:rotate-3 transition-transform', action.color)}>
+                        <Icon className="h-6 w-6" />
+                      </div>
+                      {action.locked && (
+                        <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-background border-2 border-border">
+                          <Lock className="h-2.5 w-2.5 text-muted-foreground" />
+                        </div>
+                      )}
                     </div>
                     <span className="text-sm font-medium">{action.label}</span>
                     <span className="text-xs text-muted-foreground">{action.desc}</span>

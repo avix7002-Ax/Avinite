@@ -21,7 +21,7 @@ export function CinematicIntro({ onComplete, skipAllowed = true }: CinematicIntr
 
   // GSAP text refs
   const welcomeToRef = useRef<HTMLDivElement>(null);
-  const avixAiRef = useRef<HTMLHeadingElement>(null);
+  const aviniteAiRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLDivElement>(null);
   const loaderBarRef = useRef<HTMLDivElement>(null);
   const skipBtnRef = useRef<HTMLButtonElement>(null);
@@ -33,7 +33,7 @@ export function CinematicIntro({ onComplete, skipAllowed = true }: CinematicIntr
 
   // ── GSAP text animations ──
   function playWelcomeText() {
-    if (!welcomeToRef.current || !avixAiRef.current) return;
+    if (!welcomeToRef.current || !aviniteAiRef.current) return;
 
     // "WELCOME TO" — staggered fade + rise
     gsap.fromTo(
@@ -42,9 +42,9 @@ export function CinematicIntro({ onComplete, skipAllowed = true }: CinematicIntr
       { opacity: 1, y: 0, letterSpacing: '0.4em', filter: 'blur(0px)', duration: 0.8, ease: 'power3.out' }
     );
 
-    // "AVIX AI" — 3D scale-in with glow pulse
+    // "AVINITE AI" — 3D scale-in with glow pulse
     gsap.fromTo(
-      avixAiRef.current,
+      aviniteAiRef.current,
       { opacity: 0, scale: 0.5, rotationY: -90, filter: 'drop-shadow(0 0 60px rgba(99,102,241,1)) brightness(2)' },
       {
         opacity: 1,
@@ -58,7 +58,7 @@ export function CinematicIntro({ onComplete, skipAllowed = true }: CinematicIntr
     );
 
     // Glow pulse after landing
-    gsap.to(avixAiRef.current, {
+    gsap.to(aviniteAiRef.current, {
       filter: 'drop-shadow(0 0 40px rgba(99,102,241,0.8)) drop-shadow(0 0 80px rgba(139,92,246,0.5)) brightness(1.1)',
       duration: 1.5,
       ease: 'sine.inOut',
@@ -651,9 +651,9 @@ export function CinematicIntro({ onComplete, skipAllowed = true }: CinematicIntr
           WELCOME TO
         </div>
 
-        {/* AVIX AI — metallic glowing text with 3D reveal */}
+        {/* AVINITE AI — metallic glowing text with 3D reveal */}
         <h1
-          ref={avixAiRef}
+          ref={aviniteAiRef}
           className="font-display text-5xl sm:text-7xl md:text-8xl font-bold tracking-tight text-center"
           style={{
             background: 'linear-gradient(180deg, #ffffff 0%, #c4b5fd 35%, #818cf8 65%, #6366f1 100%)',
@@ -664,7 +664,7 @@ export function CinematicIntro({ onComplete, skipAllowed = true }: CinematicIntr
             transformStyle: 'preserve-3d',
           }}
         >
-          AVIX AI
+          AVINITE AI
         </h1>
 
         {/* "The Universe of Intelligent Learning" */}
@@ -781,7 +781,7 @@ function CSSFallbackIntro({ onComplete, skipAllowed }: { onComplete: () => void;
             filter: 'drop-shadow(0 0 20px rgba(99,102,241,0.5))',
             opacity: phase >= 1 ? 1 : 0, transition: 'all 0.8s ease',
           }}
-        >AVIX AI</h1>
+        >AVINITE AI</h1>
         <div className="mt-8 text-center" style={{ opacity: phase >= 3 ? 1 : 0, transition: 'all 0.8s ease' }}>
           <div className="text-lg font-light text-blue-200/90">The</div>
           <div className="text-xl font-medium gradient-text-brand mt-1">Universe of Intelligent Learning</div>

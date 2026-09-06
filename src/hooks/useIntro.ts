@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-const INTRO_KEY = 'avix-intro-played';
+const INTRO_KEY = 'avinite-intro-played';
 
 export function useIntro() {
   const hasPlayedIntro = useCallback(() => {

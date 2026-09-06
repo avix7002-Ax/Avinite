@@ -11,7 +11,7 @@ export function AboutPage() {
           <Bot className="h-12 w-12 text-white" />
         </div>
         <h1 className="text-3xl md:text-4xl font-bold mb-2">Science PYQs AI</h1>
-        <p className="text-lg text-muted-foreground">Powered by Avix AI</p>
+        <p className="text-lg text-muted-foreground">Powered by Avinite AI</p>
         <p className="text-sm text-muted-foreground mt-2">Your Smart Learning & Student Companion</p>
       </div>
 
@@ -63,7 +63,7 @@ export function AboutPage() {
           <Card>
             <CardContent className="pt-6">
               <Zap className="h-8 w-8 text-accent mb-3" />
-              <h3 className="font-semibold mb-1">Avix AI</h3>
+              <h3 className="font-semibold mb-1">Avinite AI</h3>
               <p className="text-sm text-muted-foreground">Dual-mode AI assistant for academic support and student companionship with voice and image support.</p>
             </CardContent>
           </Card>

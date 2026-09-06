@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 
-export type ThemeMode = 'light' | 'dark';
+export type ThemeMode = 'light' | 'dark' | 'system';
 export type ThemeColor = 'blue' | 'green' | 'purple' | 'red' | 'orange' | 'pink' | 'teal';
 export type AnimationMode = 'full' | 'reduced' | 'off';
 
@@ -51,9 +51,20 @@ const themeColors: Record<ThemeColor, { light: { primary: string; accent: string
   },
 };
 
+function getSystemDark(): boolean {
+  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
+}
+
+function getEffectiveDark(mode: ThemeMode): boolean {
+  if (mode === 'system') return getSystemDark();
+  return mode === 'dark';
+}
+
 function applyTheme(mode: ThemeMode, color: ThemeColor, animations: AnimationMode) {
   const root = document.documentElement;
-  if (mode === 'dark') {
+  const isDark = getEffectiveDark(mode);
+
+  if (isDark) {
     root.classList.add('dark');
   } else {
     root.classList.remove('dark');
@@ -63,7 +74,7 @@ function applyTheme(mode: ThemeMode, color: ThemeColor, animations: AnimationMod
   if (animations === 'reduced') root.classList.add('reduce-motion');
   if (animations === 'off') root.classList.add('no-animations');
 
-  const vars = themeColors[color][mode];
+  const vars = themeColors[color][isDark ? 'dark' : 'light'];
   root.style.setProperty('--primary', vars.primary);
   root.style.setProperty('--accent', vars.accent);
   root.style.setProperty('--ring', vars.ring);
@@ -72,9 +83,9 @@ function applyTheme(mode: ThemeMode, color: ThemeColor, animations: AnimationMod
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<ThemeMode>(() => {
-    if (typeof window === 'undefined') return 'light';
+    if (typeof window === 'undefined') return 'system';
     const stored = localStorage.getItem(STORAGE_KEY_MODE) as ThemeMode | null;
-    return stored || 'light';
+    return stored || 'system';
   });
 
   const [color, setColorState] = useState<ThemeColor>(() => {
@@ -98,6 +109,16 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(STORAGE_KEY_MODE, mode);
     localStorage.setItem(STORAGE_KEY_COLOR, color);
     localStorage.setItem(STORAGE_KEY_ANIM, animations);
+  }, [mode, color, animations]);
+
+  // Listen for system theme changes when in system mode
+  useEffect(() => {
+    if (mode !== 'system') return;
+    const mediaQuery = window.matchMedia?.('(prefers-color-scheme: dark)');
+    if (!mediaQuery) return;
+    const handler = () => applyTheme('system', color, animations);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
   }, [mode, color, animations]);
 
   const setMode = useCallback((m: ThemeMode) => setModeState(m), []);

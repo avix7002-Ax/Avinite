@@ -34,7 +34,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/Badge';
 import { subjects, chapters } from '@/lib/data';
 import { cn } from '@/lib/utils';
-import { AvixLogo } from '@/components/AvixLogo';
+import { AviniteLogo } from '@/components/AviniteLogo';
 
 const features = [
   {
@@ -127,48 +127,48 @@ const pricingPlans = [
     cta: 'Start Free',
     href: '/signup',
     features: [
-      'Access to all 16 chapters',
-      'PYQ trend analysis',
-      '10 AI practice questions / day',
-      'AI doubt solver (5 / day)',
-      'Basic revision notes',
-      'Study streak tracking',
+      '10-20 questions per day',
+      'Basic progress tracking',
+      'Avinite AI academic mode',
+      'Basic revision notes & flashcards',
+      'Search across all chapters',
     ],
   },
   {
     name: 'Pro',
     tagline: 'Everything you need to top Science',
-    price: '₹299',
+    price: '₹49',
     period: '/month',
     cta: 'Get Pro',
     href: '/signup',
     popular: true,
     features: [
       'Everything in Free',
-      'Unlimited AI practice questions',
-      'Unlimited AI doubt solver',
-      'Full revision mode (mind maps, mnemonics)',
+      '30-40 questions per day',
+      'PYQ series with model answers',
+      'Marks calculator',
+      'Performance analysis & progress tracking',
+      'Catch-up & weak-area analysis',
       'Mock tests with predicted scores',
       'Study planner with custom schedules',
-      'RAG document upload',
-      'Priority AI responses',
+      'Smart revision (mind maps, mnemonics)',
     ],
   },
   {
     name: 'Premium',
-    tagline: 'Best value for board exam year',
-    price: '₹1,999',
-    period: '/year',
+    tagline: 'The complete learning companion',
+    price: '₹99',
+    period: '/month',
     cta: 'Get Premium',
     href: '/signup',
     features: [
       'Everything in Pro',
-      'Full-year access',
-      '2 months free',
-      'Personalised weak-chapter plan',
-      'Achievements & progress badges',
-      'Email progress reports',
-      'Early access to new features',
+      'Companion AI mode',
+      'Advanced AI guidance & analysis',
+      'Personalized recommendations',
+      'AI memory with deep context',
+      'Priority AI responses',
+      'All future premium features',
     ],
   },
 ];
@@ -275,7 +275,7 @@ export function LandingPage() {
 
             {/* Logo + Title */}
             <div className="mb-6 animate-fade-in-up">
-              <AvixLogo size={64} animated className="mx-auto drop-shadow-2xl" />
+              <AviniteLogo size={64} animated className="mx-auto drop-shadow-2xl" />
             </div>
 
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-balance mb-6 animate-fade-in-up font-display" style={{ animationDelay: '0.1s' }}>
@@ -385,7 +385,7 @@ export function LandingPage() {
                       <Zap className="h-3 w-3" /> Powered by Hybrid Knowledge Base + AI
                     </div>
                     <h2 className="text-2xl md:text-3xl font-bold mb-3 font-display">
-                      Meet <span className="gradient-text-brand">Avix AI</span> — Your Smart Learning Companion
+                      Meet <span className="gradient-text-brand">Avinite AI</span> — Your Smart Learning Companion
                     </h2>
                     <p className="text-muted-foreground mb-4 max-w-xl">
                       Get instant answers to CBSE Class 10 Science questions. Upload images, read files,
@@ -637,7 +637,7 @@ export function LandingPage() {
               <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl opacity-50" />
               <CardContent className="relative flex flex-col items-center text-center py-12 md:py-16">
                 <div className="mb-4">
-                  <AvixLogo size={48} />
+                  <AviniteLogo size={48} />
                 </div>
                 <h2 className="text-3xl md:text-4xl font-bold mb-4 font-display">Ready to score higher in Science?</h2>
                 <p className="text-muted-foreground max-w-xl mb-8">

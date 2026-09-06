@@ -1,5 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-// Avix AI — Hybrid Knowledge Base + AI system (OpenRouter primary, Groq fallback)
+// Avinite AI — Hybrid Knowledge Base + AI system (OpenRouter primary, Groq fallback)
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -97,7 +97,7 @@ function releaseSlot(): void {
 }
 
 // ── System prompt ──
-const SYSTEM_PROMPT = `You are Avix AI — a CBSE Class 10 Science teacher with 20 years of classroom experience. You are NOT a chatbot. You are NOT an AI assistant. You are a teacher. Students should feel they are sitting in front of a real, experienced teacher who knows exactly how to get them marks in the CBSE board exam.
+const SYSTEM_PROMPT = `You are Avinite AI — a CBSE Class 10 Science teacher with 20 years of classroom experience. You are NOT a chatbot. You are NOT an AI assistant. You are a teacher. Students should feel they are sitting in front of a real, experienced teacher who knows exactly how to get them marks in the CBSE board exam.
 
 ## THE GOLDEN RULE
 Every answer must feel like it was handwritten for that specific question by a real teacher. Never repeat the same structure twice. Never sound like a template. Never sound like a chatbot. If a student reads your answer and thinks "this feels AI-generated," you have failed.
@@ -393,8 +393,8 @@ interface KBEntry {
 function log(level: string, msg: string, extra?: unknown) {
   const ts = new Date().toISOString();
   const tag = level === "error" ? "error" : "log";
-  if (extra) console[tag](`[${ts}] [AVIX-AI] ${msg}`, extra);
-  else console[tag](`[${ts}] [AVIX-AI] ${msg}`);
+  if (extra) console[tag](`[${ts}] [AVINITE-AI] ${msg}`, extra);
+  else console[tag](`[${ts}] [AVINITE-AI] ${msg}`);
 }
 
 async function sha256(text: string): Promise<string> {
@@ -556,8 +556,8 @@ async function tryProvider(
           Authorization: `Bearer ${attempt.apiKey}`,
         };
         if (attempt.provider === "openrouter") {
-          headers["X-Title"] = "Avix AI";
-          headers["HTTP-Referer"] = "https://avix.ai";
+          headers["X-Title"] = "Avinite AI";
+          headers["HTTP-Referer"] = "https://avinite.ai";
         }
 
         const response = await fetchWithTimeout(attempt.url, {
@@ -616,7 +616,7 @@ async function tryProvider(
   throw new Error(lastError || "All models failed");
 }
 
-// ── Parse OpenAI SSE stream and re-emit as Avix SSE ──
+// ── Parse OpenAI SSE stream and re-emit as Avinite SSE ──
 function createStreamProcessor(
   response: Response,
   controller: ReadableStreamDefaultController<Uint8Array>,
@@ -713,7 +713,7 @@ function streamPrewrittenAnswer(
       ...corsHeaders,
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
-      "X-Avix-Source": source === "kb" ? "KNOWLEDGE_BASE" : "CACHE",
+      "X-Avinite-Source": source === "kb" ? "KNOWLEDGE_BASE" : "CACHE",
     },
   });
 }
@@ -1015,8 +1015,8 @@ Deno.serve(async (req: Request) => {
           "Content-Type": "text/event-stream",
           "Cache-Control": "no-cache",
           "Connection": "keep-alive",
-          "X-Avix-Source": "AI",
-          "X-Avix-Provider": usedProvider,
+          "X-Avinite-Source": "AI",
+          "X-Avinite-Provider": usedProvider,
         },
       });
     } catch (outerErr) {

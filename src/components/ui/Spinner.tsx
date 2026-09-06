@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { AvixLogo } from '@/components/AvixLogo';
+import { AviniteLogo } from '@/components/AviniteLogo';
 
 export function Spinner({ className }: { className?: string }) {
   return (
@@ -22,7 +22,7 @@ export function LoadingPage({ message = 'Loading...' }: { message?: string }) {
       {/* Premium orbiting loader */}
       <div className="relative flex h-16 w-16 items-center justify-center">
         {/* Center logo */}
-        <AvixLogo size={24} />
+        <AviniteLogo size={24} />
         {/* Orbiting dots */}
         <div className="absolute inset-0">
           {[0, 120, 240].map((angle, i) => (

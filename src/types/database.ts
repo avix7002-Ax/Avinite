@@ -12,6 +12,8 @@ export interface Database {
           target_percentage: number | null;
           exam_date: string | null;
           daily_study_hours: number | null;
+          subscription_tier: 'free' | 'pro' | 'premium';
+          is_owner: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -22,6 +24,8 @@ export interface Database {
           target_percentage?: number | null;
           exam_date?: string | null;
           daily_study_hours?: number | null;
+          subscription_tier?: 'free' | 'pro' | 'premium';
+          is_owner?: boolean;
         };
         Update: {
           id?: string;
@@ -30,6 +34,8 @@ export interface Database {
           target_percentage?: number | null;
           exam_date?: string | null;
           daily_study_hours?: number | null;
+          subscription_tier?: 'free' | 'pro' | 'premium';
+          is_owner?: boolean;
           updated_at?: string;
         };
         Relationships: [];
@@ -293,6 +299,7 @@ export interface Database {
           is_pro: boolean;
           payment_id: string | null;
           amount: number;
+          tier: 'pro' | 'premium' | null;
           upgraded_at: string | null;
           created_at: string;
         };
@@ -302,6 +309,7 @@ export interface Database {
           is_pro?: boolean;
           payment_id?: string | null;
           amount?: number;
+          tier?: 'pro' | 'premium' | null;
           upgraded_at?: string | null;
         };
         Update: {
@@ -310,6 +318,7 @@ export interface Database {
           is_pro?: boolean;
           payment_id?: string | null;
           amount?: number;
+          tier?: 'pro' | 'premium' | null;
           upgraded_at?: string | null;
         };
         Relationships: [];
@@ -342,6 +351,23 @@ export interface Database {
           content?: string;
           image_url?: string | null;
           language?: string | null;
+        };
+        Relationships: [];
+      };
+      app_config: {
+        Row: {
+          key: string;
+          value: unknown;
+          updated_at: string;
+        };
+        Insert: {
+          key: string;
+          value: unknown;
+        };
+        Update: {
+          key?: string;
+          value?: unknown;
+          updated_at?: string;
         };
         Relationships: [];
       };
