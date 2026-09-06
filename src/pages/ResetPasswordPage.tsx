@@ -35,7 +35,13 @@ export function ResetPasswordPage() {
         const url = new URL(window.location.href);
         const hashParams = new URLSearchParams(url.hash.replace(/^#/, ''));
         const queryParams = url.searchParams;
-        const callbackError = hashParams.get('error') || hashParams.get('error_code') || queryParams.get('error');
+        const callbackError =
+          hashParams.get('error') ||
+          hashParams.get('error_code') ||
+          hashParams.get('error_description') ||
+          queryParams.get('error') ||
+          queryParams.get('error_code') ||
+          queryParams.get('error_description');
         const recoveryFromUrl = hashParams.get('type') === 'recovery' || queryParams.get('type') === 'recovery';
         const hasAuthCallback = recoveryFromUrl || queryParams.has('code') || hashParams.has('access_token');
 
