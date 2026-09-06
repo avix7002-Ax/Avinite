@@ -41,10 +41,27 @@ export function getSubjectColor(subject: string): string {
 }
 
 export function getAuthRedirectUrl(path: string): string {
-  const productionUrl = import.meta.env.VITE_PRODUCTION_URL;
-  const baseUrl = productionUrl || window.location.origin;
-  const cleanPath = path.startsWith('/') ? path : `/${path}`;
-  return `${baseUrl.replace(/\/$/, '')}${cleanPath}`;
+  const configuredUrl = import.meta.env.VITE_PRODUCTION_URL?.trim();
+
+  if (!configuredUrl) {
+    throw new Error('Authentication redirects are not configured for the deployed website.');
+  }
+
+  let productionUrl: URL;
+  try {
+    productionUrl = new URL(configuredUrl);
+  } catch {
+    throw new Error('Authentication redirects are not configured with a valid deployed website URL.');
+  }
+
+  const localHosts = new Set(['localhost', '127.0.0.1', '::1']);
+  if (productionUrl.protocol !== 'https:' || localHosts.has(productionUrl.hostname) || productionUrl.hostname === 'your-deployed-site.bolt.host') {
+    throw new Error('Authentication redirects must use the deployed website HTTPS URL.');
+  }
+
+  const cleanPath = path.startsWith('/') ? path : '/' + path;
+  const basePath = productionUrl.pathname.replace(/\/$/, '');
+  return productionUrl.origin + basePath + cleanPath;
 }
 
 export function getSubjectBg(subject: string): string {
