@@ -1,4 +1,4 @@
-import { useState, useEffect, type FormEvent } from 'react';
+import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Lock, Eye, EyeOff, ArrowRight, CheckCircle2, AlertCircle, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -9,6 +9,8 @@ import { supabase } from '@/lib/supabase';
 
 type Phase = 'validating' | 'ready' | 'success' | 'error' | 'expired';
 
+const INVALID_LINK_MESSAGE = 'This password reset link is invalid, expired, or has already been used.';
+
 export function ResetPasswordPage() {
   const navigate = useNavigate();
   const [phase, setPhase] = useState<Phase>('validating');
@@ -17,67 +19,91 @@ export function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const recoveryEventRef = useRef(false);
+  const validationInFlightRef = useRef(false);
+  const validationAttemptsRef = useRef(0);
 
   useEffect(() => {
     let mounted = true;
+    let retryTimer: number | undefined;
 
-    async function validateRecoverySession() {
-      const { data: { session } } = await supabase.auth.getSession();
+    const validateRecoverySession = async () => {
+      if (!mounted || validationInFlightRef.current) return;
+      validationInFlightRef.current = true;
 
-      if (!mounted) return;
+      try {
+        const url = new URL(window.location.href);
+        const hashParams = new URLSearchParams(url.hash.replace(/^#/, ''));
+        const queryParams = url.searchParams;
+        const callbackError = hashParams.get('error') || hashParams.get('error_code') || queryParams.get('error');
+        const recoveryFromUrl = hashParams.get('type') === 'recovery' || queryParams.get('type') === 'recovery';
+        const hasAuthCallback = recoveryFromUrl || queryParams.has('code') || hashParams.has('access_token');
 
-      if (session?.user) {
-        const recoveryType = (session.user as { recovery_mode?: boolean }).recovery_mode;
-        const accessToken = session.access_token;
-        const isRecovery =
-          recoveryType === true ||
-          (typeof accessToken === 'string' && accessToken.includes('recovery'));
-
-        if (isRecovery) {
-          setPhase('ready');
-          return;
-        }
-      }
-
-      const hash = window.location.hash;
-      const params = new URLSearchParams(hash.replace(/^#/, ''));
-      const type = params.get('type');
-      const errorDescription = params.get('error_description') || params.get('error');
-
-      if (errorDescription) {
-        setErrorMsg(decodeURIComponent(errorDescription));
-        setPhase('error');
-        return;
-      }
-
-      if (type === 'recovery') {
-        const { data: { session: newSession }, error } = await supabase.auth.getSession();
-        if (!mounted) return;
-
-        if (error || !newSession) {
+        if (callbackError) {
+          setErrorMsg(INVALID_LINK_MESSAGE);
           setPhase('expired');
           return;
         }
+
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (!mounted) return;
+
+        if (sessionError || !session?.user) {
+          if (hasAuthCallback && validationAttemptsRef.current < 12) {
+            validationAttemptsRef.current += 1;
+            setPhase('validating');
+            retryTimer = window.setTimeout(() => { void validateRecoverySession(); }, 250);
+            return;
+          }
+          setErrorMsg(INVALID_LINK_MESSAGE);
+          setPhase('expired');
+          return;
+        }
+
+        const isRecoverySession = recoveryEventRef.current || recoveryFromUrl;
+        if (!isRecoverySession) {
+          setErrorMsg(INVALID_LINK_MESSAGE);
+          setPhase('expired');
+          return;
+        }
+
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (!mounted) return;
+
+        if (userError || !user) {
+          setErrorMsg(INVALID_LINK_MESSAGE);
+          setPhase('expired');
+          return;
+        }
+
         setPhase('ready');
-        return;
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } finally {
+        validationInFlightRef.current = false;
       }
+    };
 
-      if (session?.user) {
-        setPhase('ready');
-        return;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        recoveryEventRef.current = true;
+        window.setTimeout(() => { void validateRecoverySession(); }, 0);
       }
+    });
 
-      setPhase('expired');
-    }
+    void validateRecoverySession();
 
-    validateRecoverySession();
-
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+      if (retryTimer !== undefined) window.clearTimeout(retryTimer);
+      subscription.unsubscribe();
+    };
   }, []);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setErrorMsg('');
+
+    if (phase !== 'ready') return;
 
     if (password.length < 6) {
       setErrorMsg('Password must be at least 6 characters');
@@ -94,20 +120,18 @@ export function ResetPasswordPage() {
     setLoading(false);
 
     if (error) {
-      if (
-        error.message.toLowerCase().includes('token') ||
-        error.message.toLowerCase().includes('expired') ||
-        error.message.toLowerCase().includes('invalid')
-      ) {
+      const message = error.message.toLowerCase();
+      if (message.includes('token') || message.includes('expired') || message.includes('invalid') || message.includes('session')) {
+        setErrorMsg(INVALID_LINK_MESSAGE);
         setPhase('expired');
       } else {
-        setErrorMsg(error.message);
+        setErrorMsg('Unable to update your password. Please try again.');
         setPhase('error');
       }
       return;
     }
 
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({ scope: 'local' });
     setPhase('success');
     setTimeout(() => navigate('/login'), 3000);
   }
